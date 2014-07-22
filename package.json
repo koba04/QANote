@@ -1,0 +1,21 @@
+{
+  "name": "QANote",
+  "version": "0.0.1",
+  "description": "my qa site",
+  "repository": "https://github.com/koba04/QANote",
+  "main": "src/app.js",
+  "dependencies": {},
+  "devDependencies": {
+    "beefy": "^2.1.0",
+    "browserify": "^4.2.3",
+    "insert-css": "^0.2.0",
+    "partialify": "^3.1.1",
+    "stylify": "^0.1.5"
+  },
+  "author": "koba04",
+  "license": "MIT",
+  "scripts": {
+    "dev": "beefy src/index.js:bundle.js --live -- -t partialify -t stylify",
+    "build": "browserify src/index.js -t partialify -t stylify > bundle.js"
+  }
+}
