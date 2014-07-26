@@ -4,7 +4,10 @@
   "description": "my qa site",
   "repository": "https://github.com/koba04/QANote",
   "main": "src/app.js",
-  "dependencies": {},
+  "dependencies": {
+    "director": "^1.2.3",
+    "vue": "^0.10.5"
+  },
   "devDependencies": {
     "beefy": "^2.1.0",
     "browserify": "^4.2.3",
