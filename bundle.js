@@ -5212,26 +5212,148 @@ function query (el) {
 
 module.exports = ViewModel
 },{"./batcher":3,"./compiler":5,"./transition":26,"./utils":27}],29:[function(require,module,exports){
-module.exports = 'Hello {{name}}\n';
+module.exports = '<h1>QANote</h1>\n<div v-view="view"></div>\n';
 },{}],30:[function(require,module,exports){
 'use strict';
 
-Vue       = require('vue'),
-director  = require('director')
+var Vue       = require('vue'),
+    director  = require('director')
 ;
+
+Vue.config("debug", true);
+
+// component
+Vue.component('top', require('./top/'));
+Vue.component('login', require('./login/'));
 
 // create App
 require('insert-css')(require('./index.styl'));
-app = new Vue({
+var app = new Vue({
   el: '#app',
   className: "container",
   template: require('./index.html'),
   data: {
+    view: 'top',
     name: "vue",
   }
 });
 
 
-},{"./index.html":29,"./index.styl":31,"director":1,"insert-css":2,"vue":23}],31:[function(require,module,exports){
+
+},{"./index.html":29,"./index.styl":31,"./login/":33,"./top/":36,"director":1,"insert-css":2,"vue":23}],31:[function(require,module,exports){
 module.exports = "#app .v-enter{-webkit-animation:fadein .5s;-webkit-animation-delay:.2s;animation:fadein .5s;animation-delay:.2s;opacity:0}#app .v-leave{-webkit-animation:fadeout .2s;animation:fadeout .2s}@-moz-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-webkit-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-o-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-moz-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@-webkit-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@-o-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}";
+},{}],32:[function(require,module,exports){
+module.exports = '<div class="alert alert-danger" v-if="error" v-text="error"></div>\n<div class="form-group">\n  <label>ID</label>\n  <input type="text" class="form-control" v-model="loginid">\n</div>\n<div class="form-group">\n  <label>Password</label>\n  <input type="password" class="form-control" v-model="password">\n</div>\n<div class="form-group" v-if="type === \'register\'">\n  <label>Email</label>\n  <input type="email" class="form-control" v-model="email" />\n</div>\n<button type="submit" class="btn btn-default" v-on="click: loginOrRegister" v-text="buttonValue"></button>\n<a v-on="click: toggleType" v-text="toggleValue"></a>\n';
+},{}],33:[function(require,module,exports){
+require('insert-css')(require('./index.styl'));
+
+var Vue   = require('vue'),
+    User  = require('../user')
+;
+
+module.exports = Vue.extend({
+  template: require('./index.html'),
+  data: {
+    type:     'login',
+    loginid:  '',
+    password: '',
+    email:    '',
+    error:    ''
+  },
+  computed: {
+    buttonValue: function() {
+      return this.type === 'register' ? 'Register' : 'Login';
+    },
+    toggleValue: function() {
+      return this.type === 'register' ? 'Login?' : 'Register?';
+    }
+  },
+  methods: {
+    toggleType: function() {
+      this.type = (this.type === 'register' ? 'login' : 'register');
+    },
+    loginOrRegister: function() {
+      this.error = '';
+      this.type === 'register' ? this.register() : this.login();
+    },
+    login: function() {
+      if (!this.loginid || !this.password) {
+        this.error = "ID and Password is required";
+        return;
+      }
+
+      User.login(this.loginid, this.password).then(
+        function() {
+          this.$parent.view = 'top';
+        }.bind(this),
+        function(error) {
+          this.error = error.message;
+        }.bind(this)
+      );
+    },
+    register: function() {
+      if (!this.loginid || !this.password || !this.email) {
+        this.error = "ID and Password and Email is required";
+        return;
+      }
+
+      User.register(this.loginid, this.password, this.email).then(
+        function() {
+          this.$parent.view = 'top';
+        }.bind(this),
+        function(error) {
+          this.error = error.message;
+        }.bind(this)
+      );
+    }
+  }
+});
+
+
+},{"../user":38,"./index.html":32,"./index.styl":34,"insert-css":2,"vue":23}],34:[function(require,module,exports){
+module.exports = "";
+},{}],35:[function(require,module,exports){
+module.exports = 'top\n';
+},{}],36:[function(require,module,exports){
+require('insert-css')(require('./index.styl'));
+
+var Vue = require('vue'),
+    User      = require('../user')
+;
+
+module.exports = Vue.extend({
+  template: require('./index.html'),
+  created: function() {
+    if (!User.current()) this.$parent.view = 'login';
+  }
+});
+
+
+},{"../user":38,"./index.html":35,"./index.styl":37,"insert-css":2,"vue":23}],37:[function(require,module,exports){
+module.exports=require(34)
+},{}],38:[function(require,module,exports){
+'use strict';
+
+function User() {
+  Parse.initialize("QvIeb4Xn9a3HrGbgTVMIMfrtltKwGBvM4ycpMEBk", "2V0zGyKEJxyinKfrPMnxlcKGxJlQ7exCwBd6yTgS");
+};
+
+User.prototype.current = function() {
+  return Parse.User.current();
+}
+
+User.prototype.login = function(id, pass) {
+  return Parse.User.logIn(id, pass);
+};
+
+User.prototype.register = function(id, pass, email) {
+  var user = new Parse.User();
+  user.set("username", id);
+  user.set("password", pass);
+  user.set("email",   email);
+  return user.signUp();
+};
+
+module.exports = new User();
+
 },{}]},{},[30])
