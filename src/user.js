@@ -20,4 +20,21 @@ User.prototype.register = function(id, pass, email) {
   return user.signUp();
 };
 
+User.prototype.fetchCategories = function() {
+  var user = this.current();
+  var Categories = Parse.Object.extend("Categories");
+  var query = new Parse.Query(Categories);
+  query.equalTo("user", user);
+  return query.find();
+};
+
+User.prototype.addCategory = function(category) {
+  var user = this.current();
+  var Categories = Parse.Object.extend("Categories");
+  var categories = new Categories();
+  categories.set("user", user);
+  categories.set("name", category);
+  return categories.save();
+};
+
 module.exports = new User();

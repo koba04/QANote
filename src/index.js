@@ -4,7 +4,7 @@ var Vue       = require('vue'),
     director  = require('director')
 ;
 
-Vue.config("debug", true);
+// Vue.config("debug", true);
 
 // component
 Vue.component('top', require('./top/'));
