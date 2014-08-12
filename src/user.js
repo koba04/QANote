@@ -32,6 +32,7 @@ User.prototype.addCategory = function(category) {
   var user = this.current();
   var Categories = Parse.Object.extend("Categories");
   var categories = new Categories();
+  categories.setACL(new Parse.ACL(user));
   categories.set("user", user);
   categories.set("name", category);
   return categories.save();
