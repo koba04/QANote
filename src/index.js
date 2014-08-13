@@ -16,6 +16,9 @@ var app = new Vue({
   el: '#app',
   className: "container",
   template: require('./index.html'),
+  components: {
+    header: require('./header/'),
+  },
   data: {
     view: 'top',
     name: "vue",
