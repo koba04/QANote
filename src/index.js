@@ -22,13 +22,13 @@ var app = new Vue({
   },
   data: {
     view: 'top',
-    name: "vue",
+    category: '',
   }
 });
 
 var router = new director.Router();
 router.on(':category', function(category) {
-  console.log(category);
+  app.category = category;
   app.view = 'qa';
 });
 router.on('', function() {

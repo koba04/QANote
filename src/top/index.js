@@ -23,7 +23,7 @@ module.exports = Vue.extend({
     addCategory: function() {
       if (!this.category) return;
       User.addCategory(this.category).done(function(category) {
-        this.categories.push(category.attributes);
+        this.categories.unshift(category.attributes);
       }.bind(this));
     }
   }

@@ -22,20 +22,41 @@ User.prototype.register = function(id, pass, email) {
 
 User.prototype.fetchCategories = function() {
   var user = this.current();
-  var Categories = Parse.Object.extend("Categories");
-  var query = new Parse.Query(Categories);
+  var Category = Parse.Object.extend("Category");
+  var query = new Parse.Query(Category);
   query.equalTo("user", user);
-  return query.find();
+  return query.descending('updatedAt').find();
 };
 
-User.prototype.addCategory = function(category) {
+User.prototype.addCategory = function(name) {
   var user = this.current();
-  var Categories = Parse.Object.extend("Categories");
-  var categories = new Categories();
-  categories.setACL(new Parse.ACL(user));
-  categories.set("user", user);
-  categories.set("name", category);
-  return categories.save();
+  var Category = Parse.Object.extend("Category");
+  var category = new Category();
+  category.setACL(new Parse.ACL(user));
+  category.set("user", user);
+  category.set("name", name);
+  return category.save();
+};
+
+User.prototype.fetchQAList = function(category) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var query = new Parse.Query(QA);
+  query.equalTo("user", user);
+  query.equalTo("category", category);
+  return query.descending('updatedAt').find();
+};
+
+User.prototype.addQA = function(data) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA();
+  qa.setACL(new Parse.ACL(user));
+  qa.set("user", user);
+  qa.set("category", data.category);
+  qa.set("question", data.question);
+  qa.set("answer", data.answer);
+  return qa.save();
 };
 
 module.exports = new User();
