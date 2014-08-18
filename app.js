@@ -12,4 +12,5 @@ app.get('/bundle.js', function(req, res) {
   res.send(fs.readFileSync(__dirname + '/bundle.js'));
 });
 
-app.listen(3000);
+var port = +(process.env.PORT || 5000);
+app.listen(port);
