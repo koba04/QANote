@@ -2,6 +2,9 @@
 
 My parsonal Q&A Note.
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/koba04/QANote)
+
+
 * vue.js
 * browserify
   * beefy (auto build & livereload)
