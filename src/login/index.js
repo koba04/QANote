@@ -1,7 +1,7 @@
 require('insert-css')(require('./index.styl'));
 
-var Vue   = require('vue'),
-    User  = require('../user')
+var Vue = require('vue'),
+    Api = require('../api')
 ;
 
 module.exports = Vue.extend({
@@ -35,7 +35,7 @@ module.exports = Vue.extend({
         return;
       }
 
-      User.login(this.loginid, this.password).then(
+      Api.login(this.loginid, this.password).then(
         function() {
           this.$parent.view = 'top';
         }.bind(this),
@@ -50,7 +50,7 @@ module.exports = Vue.extend({
         return;
       }
 
-      User.register(this.loginid, this.password, this.email).then(
+      Api.register(this.loginid, this.password, this.email).then(
         function() {
           this.$parent.view = 'top';
         }.bind(this),

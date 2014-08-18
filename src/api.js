@@ -1,18 +1,18 @@
 'use strict';
 
-function User() {
+function Api() {
   Parse.initialize("QvIeb4Xn9a3HrGbgTVMIMfrtltKwGBvM4ycpMEBk", "2V0zGyKEJxyinKfrPMnxlcKGxJlQ7exCwBd6yTgS");
 };
 
-User.prototype.current = function() {
+Api.prototype.current = function() {
   return Parse.User.current();
 }
 
-User.prototype.login = function(id, pass) {
+Api.prototype.login = function(id, pass) {
   return Parse.User.logIn(id, pass);
 };
 
-User.prototype.register = function(id, pass, email) {
+Api.prototype.register = function(id, pass, email) {
   var user = new Parse.User();
   user.set("username", id);
   user.set("password", pass);
@@ -20,7 +20,7 @@ User.prototype.register = function(id, pass, email) {
   return user.signUp();
 };
 
-User.prototype.fetchCategories = function() {
+Api.prototype.fetchCategories = function() {
   var user = this.current();
   var Category = Parse.Object.extend("Category");
   var query = new Parse.Query(Category);
@@ -28,7 +28,7 @@ User.prototype.fetchCategories = function() {
   return query.descending('updatedAt').find();
 };
 
-User.prototype.addCategory = function(name) {
+Api.prototype.addCategory = function(name) {
   var user = this.current();
   var Category = Parse.Object.extend("Category");
   var category = new Category();
@@ -38,7 +38,7 @@ User.prototype.addCategory = function(name) {
   return category.save();
 };
 
-User.prototype.fetchQAList = function(category) {
+Api.prototype.fetchQAList = function(category) {
   var user = this.current();
   var QA = Parse.Object.extend("QA");
   var query = new Parse.Query(QA);
@@ -47,7 +47,7 @@ User.prototype.fetchQAList = function(category) {
   return query.descending('updatedAt').find();
 };
 
-User.prototype.addQA = function(data) {
+Api.prototype.addQA = function(data) {
   var user = this.current();
   var QA = Parse.Object.extend("QA");
   var qa = new QA();
@@ -59,4 +59,4 @@ User.prototype.addQA = function(data) {
   return qa.save();
 };
 
-module.exports = new User();
+module.exports = new Api();

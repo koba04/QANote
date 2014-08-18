@@ -1,7 +1,7 @@
 require('insert-css')(require('./index.styl'));
 
-var Vue   = require('vue'),
-    User  = require('../user')
+var Vue = require('vue'),
+    Api = require('../api')
 ;
 
 module.exports = Vue.extend({
@@ -13,19 +13,19 @@ module.exports = Vue.extend({
     answer: '',
   },
   created: function() {
-    if (!User.current()) {
+    if (!Api.current()) {
       this.$parent.view = 'login';
       return;
     }
     this.category = this.$parent.category;
-    User.fetchQAList(this.category).done(function(QAList) {
+    Api.fetchQAList(this.category).done(function(QAList) {
       this.QAList = QAList.map(function(QA) { return QA.attributes });
     }.bind(this));
   },
   methods: {
     addQA: function() {
       if (!this.category || !this.question || !this.answer) return;
-      User.addQA({
+      Api.addQA({
         category: this.category,
         question: this.question,
         answer: this.answer,
