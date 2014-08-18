@@ -5212,19 +5212,119 @@ function query (el) {
 
 module.exports = ViewModel
 },{"./batcher":3,"./compiler":5,"./transition":26,"./utils":27}],29:[function(require,module,exports){
-module.exports = '<h1>QANote</h1>\n<div v-view="view"></div>\n';
+'use strict';
+
+function Api() {
+  Parse.initialize("QvIeb4Xn9a3HrGbgTVMIMfrtltKwGBvM4ycpMEBk", "2V0zGyKEJxyinKfrPMnxlcKGxJlQ7exCwBd6yTgS");
+};
+
+Api.prototype.current = function() {
+  return Parse.User.current();
+}
+
+Api.prototype.login = function(id, pass) {
+  return Parse.User.logIn(id, pass);
+};
+
+Api.prototype.register = function(id, pass, email) {
+  var user = new Parse.User();
+  user.set("username", id);
+  user.set("password", pass);
+  user.set("email",   email);
+  return user.signUp();
+};
+
+Api.prototype.fetchCategories = function() {
+  var user = this.current();
+  var Category = Parse.Object.extend("Category");
+  var query = new Parse.Query(Category);
+  query.equalTo("user", user);
+  return query.descending('updatedAt').find();
+};
+
+Api.prototype.addCategory = function(name) {
+  var user = this.current();
+  var Category = Parse.Object.extend("Category");
+  var category = new Category();
+  category.setACL(new Parse.ACL(user));
+  category.set("user", user);
+  category.set("name", name);
+  return category.save();
+};
+
+Api.prototype.fetchQAList = function(category) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var query = new Parse.Query(QA);
+  query.equalTo("user", user);
+  query.equalTo("category", category);
+  return query.descending('updatedAt').find();
+};
+
+Api.prototype.addQA = function(data) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA();
+  qa.setACL(new Parse.ACL(user));
+  qa.set("user", user);
+  qa.set("category", data.category);
+  qa.set("question", data.question);
+  qa.set("answer", data.answer);
+  return qa.save();
+};
+
+module.exports = new Api();
+
 },{}],30:[function(require,module,exports){
+module.exports = '<nav class="navbar navbar-inverse" role="navigation">\n  <div class="container-fluid">\n    <div class="navbar-header">\n      <a class="navbar-brand" href="#">QANote</a>\n    </div>\n    <p class="navbar-text" v-text="description"></p>\n  </div>\n</nav>\n\n';
+},{}],31:[function(require,module,exports){
+require('insert-css')(require('./index.styl'));
+
+var Vue = require('vue');
+
+module.exports = Vue.extend({
+  template: require('./index.html'),
+  data: {
+    description: "",
+  },
+  created: function() {
+    this.updateDescription(this.$parent.view);
+    this.$parent.$watch('view', function(value) {
+      this.updateDescription(value);
+    }.bind(this));
+  },
+  methods: {
+    updateDescription: function(view) {
+      switch (view) {
+        case "top":
+          this.description = "Category";
+          break;
+        case "qa":
+          this.description = this.$parent.category;
+          break;
+      }
+    }
+  }
+});
+
+
+},{"./index.html":30,"./index.styl":32,"insert-css":2,"vue":23}],32:[function(require,module,exports){
+module.exports = "";
+},{}],33:[function(require,module,exports){
+module.exports = '<header v-component="header"></header>\n<div v-view="view"></div>\n<footer class="well">\n&copy;koba04 <a href="https://github.com/koba04/QANote">https://github.com/koba04/QANote</a>\n</footer>\n';
+},{}],34:[function(require,module,exports){
 'use strict';
 
 var Vue       = require('vue'),
     director  = require('director')
 ;
 
-Vue.config("debug", true);
+// Vue.config("debug", true);
 
 // component
 Vue.component('top', require('./top/'));
 Vue.component('login', require('./login/'));
+Vue.component('qa', require('./qa/'));
 
 // create App
 require('insert-css')(require('./index.styl'));
@@ -5232,23 +5332,36 @@ var app = new Vue({
   el: '#app',
   className: "container",
   template: require('./index.html'),
+  components: {
+    header: require('./header/'),
+  },
   data: {
     view: 'top',
-    name: "vue",
+    category: '',
   }
 });
 
+var router = new director.Router();
+router.on(':category', function(category) {
+  app.category = category;
+  app.view = 'qa';
+});
+router.on('', function() {
+  console.log('top');
+  app.view = 'top';
+});
+router.init();
 
 
-},{"./index.html":29,"./index.styl":31,"./login/":33,"./top/":36,"director":1,"insert-css":2,"vue":23}],31:[function(require,module,exports){
+},{"./header/":31,"./index.html":33,"./index.styl":35,"./login/":37,"./qa/":40,"./top/":43,"director":1,"insert-css":2,"vue":23}],35:[function(require,module,exports){
 module.exports = "#app .v-enter{-webkit-animation:fadein .5s;-webkit-animation-delay:.2s;animation:fadein .5s;animation-delay:.2s;opacity:0}#app .v-leave{-webkit-animation:fadeout .2s;animation:fadeout .2s}@-moz-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-webkit-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-o-keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@keyframes fadein{0%{transform:scale(0.5);-webkit-transform:scale(0.5);opacity:0}50%{transform:scale(1.2);-webkit-transform:scale(1.2);opacity:.7}100%{transform:scale(1);-webkit-transform:scale(1);opacity:1}}@-moz-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@-webkit-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@-o-keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}@keyframes fadeout{0%{transform:scale(1);-webkit-transform:scale(1)}100%{transform:scale(0);-webkit-transform:scale(0)}}";
-},{}],32:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = '<div class="alert alert-danger" v-if="error" v-text="error"></div>\n<div class="form-group">\n  <label>ID</label>\n  <input type="text" class="form-control" v-model="loginid">\n</div>\n<div class="form-group">\n  <label>Password</label>\n  <input type="password" class="form-control" v-model="password">\n</div>\n<div class="form-group" v-if="type === \'register\'">\n  <label>Email</label>\n  <input type="email" class="form-control" v-model="email" />\n</div>\n<button type="submit" class="btn btn-default" v-on="click: loginOrRegister" v-text="buttonValue"></button>\n<a v-on="click: toggleType" v-text="toggleValue"></a>\n';
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 require('insert-css')(require('./index.styl'));
 
-var Vue   = require('vue'),
-    User  = require('../user')
+var Vue = require('vue'),
+    Api = require('../api')
 ;
 
 module.exports = Vue.extend({
@@ -5282,7 +5395,7 @@ module.exports = Vue.extend({
         return;
       }
 
-      User.login(this.loginid, this.password).then(
+      Api.login(this.loginid, this.password).then(
         function() {
           this.$parent.view = 'top';
         }.bind(this),
@@ -5297,7 +5410,7 @@ module.exports = Vue.extend({
         return;
       }
 
-      User.register(this.loginid, this.password, this.email).then(
+      Api.register(this.loginid, this.password, this.email).then(
         function() {
           this.$parent.view = 'top';
         }.bind(this),
@@ -5310,50 +5423,87 @@ module.exports = Vue.extend({
 });
 
 
-},{"../user":38,"./index.html":32,"./index.styl":34,"insert-css":2,"vue":23}],34:[function(require,module,exports){
-module.exports = "";
-},{}],35:[function(require,module,exports){
-module.exports = 'top\n';
-},{}],36:[function(require,module,exports){
+},{"../api":29,"./index.html":36,"./index.styl":38,"insert-css":2,"vue":23}],38:[function(require,module,exports){
+module.exports=require(32)
+},{}],39:[function(require,module,exports){
+module.exports = '<ul class="list-group">\n  <li class="list-group-item" v-repeat="QAList">{{question}} / {{answer}}</li>\n</ul>\n<div class="form-group">\n  <div class="input-group">\n    <input type="text" class="form-control" v-model="question" placeholder="Question">\n    <input type="text" class="form-control" v-model="answer" placeholder="Answer">\n    <span class="input-group-btn">\n      <button type="submit" class="btn btn-default" v-on="click: addQA">Add</button>\n    </span>\n  </div>\n</div>\n';
+},{}],40:[function(require,module,exports){
 require('insert-css')(require('./index.styl'));
 
 var Vue = require('vue'),
-    User      = require('../user')
+    Api = require('../api')
 ;
 
 module.exports = Vue.extend({
   template: require('./index.html'),
+  data: {
+    QAList: [],
+    category: '',
+    question: '',
+    answer: '',
+  },
   created: function() {
-    if (!User.current()) this.$parent.view = 'login';
+    if (!Api.current()) {
+      this.$parent.view = 'login';
+      return;
+    }
+    this.category = this.$parent.category;
+    Api.fetchQAList(this.category).done(function(QAList) {
+      this.QAList = QAList.map(function(QA) { return QA.attributes });
+    }.bind(this));
+  },
+  methods: {
+    addQA: function() {
+      if (!this.category || !this.question || !this.answer) return;
+      Api.addQA({
+        category: this.category,
+        question: this.question,
+        answer: this.answer,
+      }).done(function(QA) {
+        this.QAList.unshift(QA.attributes);
+      }.bind(this));
+    }
+  },
+});
+
+
+},{"../api":29,"./index.html":39,"./index.styl":41,"insert-css":2,"vue":23}],41:[function(require,module,exports){
+module.exports=require(32)
+},{}],42:[function(require,module,exports){
+module.exports = '<div class="list-group">\n  <a href="#{{name}}" class="list-group-item" v-repeat="categories">{{name}}</a>\n</div>\n<div class="form-group">\n  <div class="input-group">\n    <input type="text" class="form-control" v-model="category">\n    <span class="input-group-btn">\n      <button type="submit" class="btn btn-default" v-on="click: addCategory">Add</button>\n    </span>\n  </div>\n</div>\n';
+},{}],43:[function(require,module,exports){
+require('insert-css')(require('./index.styl'));
+
+var Vue = require('vue'),
+    Api = require('../api')
+;
+
+module.exports = Vue.extend({
+  template: require('./index.html'),
+  data: {
+    categories: [],
+    category: ''
+  },
+  created: function() {
+    if (!Api.current()) {
+      this.$parent.view = 'login';
+      return;
+    }
+    Api.fetchCategories().done(function(categories) {
+      this.categories = categories.map(function(category) { return category.attributes });
+    }.bind(this));
+  },
+  methods: {
+    addCategory: function() {
+      if (!this.category) return;
+      Api.addCategory(this.category).done(function(category) {
+        this.categories.unshift(category.attributes);
+      }.bind(this));
+    }
   }
 });
 
 
-},{"../user":38,"./index.html":35,"./index.styl":37,"insert-css":2,"vue":23}],37:[function(require,module,exports){
-module.exports=require(34)
-},{}],38:[function(require,module,exports){
-'use strict';
-
-function User() {
-  Parse.initialize("QvIeb4Xn9a3HrGbgTVMIMfrtltKwGBvM4ycpMEBk", "2V0zGyKEJxyinKfrPMnxlcKGxJlQ7exCwBd6yTgS");
-};
-
-User.prototype.current = function() {
-  return Parse.User.current();
-}
-
-User.prototype.login = function(id, pass) {
-  return Parse.User.logIn(id, pass);
-};
-
-User.prototype.register = function(id, pass, email) {
-  var user = new Parse.User();
-  user.set("username", id);
-  user.set("password", pass);
-  user.set("email",   email);
-  return user.signUp();
-};
-
-module.exports = new User();
-
-},{}]},{},[30])
+},{"../api":29,"./index.html":42,"./index.styl":44,"insert-css":2,"vue":23}],44:[function(require,module,exports){
+module.exports=require(32)
+},{}]},{},[34])
