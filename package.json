@@ -16,8 +16,8 @@
     "partialify": "^3.1.1",
     "stylify": "^0.1.5"
   },
-  "engine": {
-    "node": "v0.10.30"
+  "engines": {
+    "node": "0.10.30"
   },
   "author": "koba04",
   "license": "MIT",
