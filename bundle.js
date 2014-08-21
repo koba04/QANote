@@ -5426,7 +5426,7 @@ module.exports = Vue.extend({
 },{"../api":29,"./index.html":36,"./index.styl":38,"insert-css":2,"vue":23}],38:[function(require,module,exports){
 module.exports=require(32)
 },{}],39:[function(require,module,exports){
-module.exports = '<ul class="list-group">\n  <li class="list-group-item" v-repeat="QAList">{{question}} / {{answer}}</li>\n</ul>\n<div class="form-group">\n  <div class="input-group">\n    <input type="text" class="form-control" v-model="question" placeholder="Question">\n    <input type="text" class="form-control" v-model="answer" placeholder="Answer">\n    <span class="input-group-btn">\n      <button type="submit" class="btn btn-default" v-on="click: addQA">Add</button>\n    </span>\n  </div>\n</div>\n';
+module.exports = '<div class="qa-operation">\n  <button class="btn btn-default" v-on="click: isShowForm=!isShowForm">Add Question</button>\n</div>\n\n<div class="form-horizontal qa-form" v-show="isShowForm">\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Question</label>\n    <div class="col-sm-11">\n      <input type="text" class="form-control" v-model="question" required>\n    </div>\n  </div>\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Answer</label>\n    <div class="col-sm-11">\n      <textarea class="form-control" rows="3" v-model="answer" required></textarea>\n    </div>\n  </div>\n  <div class="form-group">\n    <div class="col-sm-offset-1 col-sm-11">\n      <button type="submit" class="btn btn-primary" v-on="click: addQA">Add</button>\n    </div>\n  </div>\n</div>\n\n<div class="checkbox">\n  <label>\n    <input type="checkbox" v-on="change: toggleAllQA">Show all answers\n  </label>\n</div>\n\n<div class="list-group qa-list">\n  <a class="list-group-item qa-list-item" v-repeat="QAList">\n    <span class="qa-list-item-question"  v-on="click: toggleQA">{{question}}</span>\n    <pre class="qa-list-item-answer" v-show="isShow">{{answer}}</pre>\n  </a>\n</div>\n\n';
 },{}],40:[function(require,module,exports){
 require('insert-css')(require('./index.styl'));
 
@@ -5449,10 +5449,23 @@ module.exports = Vue.extend({
     }
     this.category = this.$parent.category;
     Api.fetchQAList(this.category).done(function(QAList) {
-      this.QAList = QAList.map(function(QA) { return QA.attributes });
+      this.QAList = QAList.map(function(QA) {
+        var data = QA.attributes;
+        data.isShow = false;
+        return data;
+      });
     }.bind(this));
   },
   methods: {
+    toggleQA: function(e) {
+      e.targetVM.isShow = !e.targetVM.isShow;
+    },
+    toggleAllQA: function(e) {
+      var isShow = e.target.checked;
+      this.QAList.map(function(QA) {
+        QA.isShow = isShow;
+      });
+    },
     addQA: function() {
       if (!this.category || !this.question || !this.answer) return;
       Api.addQA({
@@ -5460,7 +5473,9 @@ module.exports = Vue.extend({
         question: this.question,
         answer: this.answer,
       }).done(function(QA) {
-        this.QAList.unshift(QA.attributes);
+        var data = QA.attributes;
+        data.isShow = true;
+        this.QAList.unshift(data);
       }.bind(this));
     }
   },
@@ -5468,9 +5483,9 @@ module.exports = Vue.extend({
 
 
 },{"../api":29,"./index.html":39,"./index.styl":41,"insert-css":2,"vue":23}],41:[function(require,module,exports){
-module.exports=require(32)
+module.exports = ".qa-operation{margin:5px}.qa-form{border:1px solid #ccc;border-radius:5px;margin:10px;padding:10px}.qa-list .qa-list-item .qa-list-item-question{display:block}.qa-list .qa-list-item .qa-list-item-answer{display:block;margin-top:10px;padding-top:5px;border-top:solid 1px #ccc}";
 },{}],42:[function(require,module,exports){
-module.exports = '<div class="list-group">\n  <a href="#{{name}}" class="list-group-item" v-repeat="categories">{{name}}</a>\n</div>\n<div class="form-group">\n  <div class="input-group">\n    <input type="text" class="form-control" v-model="category">\n    <span class="input-group-btn">\n      <button type="submit" class="btn btn-default" v-on="click: addCategory">Add</button>\n    </span>\n  </div>\n</div>\n';
+module.exports = '<div class="list-group">\n  <a href="#{{name}}" class="list-group-item" v-repeat="categories">{{name}}</a>\n</div>\n<div class="form-group">\n  <div class="input-group">\n    <input type="text" class="form-control" v-model="category" placeholder="New Category">\n    <span class="input-group-btn">\n      <button type="submit" class="btn btn-default" v-on="click: addCategory">Add</button>\n    </span>\n  </div>\n</div>\n';
 },{}],43:[function(require,module,exports){
 require('insert-css')(require('./index.styl'));
 
