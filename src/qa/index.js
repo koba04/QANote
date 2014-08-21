@@ -19,10 +19,23 @@ module.exports = Vue.extend({
     }
     this.category = this.$parent.category;
     Api.fetchQAList(this.category).done(function(QAList) {
-      this.QAList = QAList.map(function(QA) { return QA.attributes });
+      this.QAList = QAList.map(function(QA) {
+        var data = QA.attributes;
+        data.isShow = false;
+        return data;
+      });
     }.bind(this));
   },
   methods: {
+    toggleQA: function(e) {
+      e.targetVM.isShow = !e.targetVM.isShow;
+    },
+    toggleAllQA: function(e) {
+      var isShow = e.target.checked;
+      this.QAList.map(function(QA) {
+        QA.isShow = isShow;
+      });
+    },
     addQA: function() {
       if (!this.category || !this.question || !this.answer) return;
       Api.addQA({
@@ -30,7 +43,9 @@ module.exports = Vue.extend({
         question: this.question,
         answer: this.answer,
       }).done(function(QA) {
-        this.QAList.unshift(QA.attributes);
+        var data = QA.attributes;
+        data.isShow = true;
+        this.QAList.unshift(data);
       }.bind(this));
     }
   },
