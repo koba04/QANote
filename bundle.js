@@ -5273,6 +5273,21 @@ Api.prototype.addQA = function(data) {
   return qa.save();
 };
 
+Api.prototype.editQA = function(data) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA(data);
+  qa.set("user", user);
+  return qa.save();
+};
+
+Api.prototype.removeQA = function(id) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA({id: id});
+  return qa.destroy();
+};
+
 module.exports = new Api();
 
 },{}],30:[function(require,module,exports){
@@ -5426,7 +5441,7 @@ module.exports = Vue.extend({
 },{"../api":29,"./index.html":36,"./index.styl":38,"insert-css":2,"vue":23}],38:[function(require,module,exports){
 module.exports=require(32)
 },{}],39:[function(require,module,exports){
-module.exports = '<div class="qa-operation">\n  <button class="btn btn-default" v-on="click: isShowForm=!isShowForm">Add Question</button>\n</div>\n\n<div class="form-horizontal qa-form" v-show="isShowForm">\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Question</label>\n    <div class="col-sm-11">\n      <input type="text" class="form-control" v-model="question" required>\n    </div>\n  </div>\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Answer</label>\n    <div class="col-sm-11">\n      <textarea class="form-control" rows="3" v-model="answer" required></textarea>\n    </div>\n  </div>\n  <div class="form-group">\n    <div class="col-sm-offset-1 col-sm-11">\n      <button type="submit" class="btn btn-primary" v-on="click: addQA">Add</button>\n    </div>\n  </div>\n</div>\n\n<div class="checkbox">\n  <label>\n    <input type="checkbox" v-on="change: toggleAllQA">Show all answers\n  </label>\n</div>\n\n<div class="list-group qa-list">\n  <a class="list-group-item qa-list-item" v-repeat="QAList">\n    <span class="qa-list-item-question"  v-on="click: toggleQA">{{question}}</span>\n    <pre class="qa-list-item-answer" v-show="isShow">{{answer}}</pre>\n  </a>\n</div>\n\n';
+module.exports = '<div class="qa-operation">\n  <button class="btn btn-default" v-on="click: isShowForm=!isShowForm">Add Question</button>\n</div>\n\n<div class="form-horizontal qa-form" v-show="isShowForm">\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Question</label>\n    <div class="col-sm-11">\n      <input type="text" class="form-control" v-model="question" required>\n    </div>\n  </div>\n  <div class="form-group">\n    <label class="col-sm-1 control-label">Answer</label>\n    <div class="col-sm-11">\n      <textarea class="form-control" rows="3" v-model="answer" required></textarea>\n    </div>\n  </div>\n  <div class="form-group">\n    <div class="col-sm-offset-1 col-sm-11">\n      <button type="submit" class="btn btn-primary" v-on="click: addQA">Add</button>\n    </div>\n  </div>\n</div>\n\n<div class="checkbox">\n  <label>\n    <input type="checkbox" v-on="change: toggleAllQA">Show all answers\n  </label>\n</div>\n\n<div class="list-group qa-list">\n  <a class="list-group-item qa-list-item" v-repeat="QAList">\n    <span class="qa-list-item-question"  v-on="click: toggleQA">{{question}}</span>\n    <span v-show="isShow">\n      <input type="text" class="qa-list-item-answer" v-model="answer" />\n      <button class="btn btn-primary" v-on="click: editQA">Edit</button>\n      <button class="btn btn-danger" v-on="click: removeQA">Remove</button>\n    </span>\n  </a>\n</div>\n\n';
 },{}],40:[function(require,module,exports){
 require('insert-css')(require('./index.styl'));
 
@@ -5451,6 +5466,7 @@ module.exports = Vue.extend({
     Api.fetchQAList(this.category).done(function(QAList) {
       this.QAList = QAList.map(function(QA) {
         var data = QA.attributes;
+        data.id = QA.id;
         data.isShow = false;
         return data;
       });
@@ -5474,10 +5490,28 @@ module.exports = Vue.extend({
         answer: this.answer,
       }).done(function(QA) {
         var data = QA.attributes;
+        data.id = QA.id;
         data.isShow = true;
         this.QAList.unshift(data);
+        this.question = "";
+        this.answer = "";
+        this.isShowForm = false;
       }.bind(this));
-    }
+    },
+    editQA: function(e) {
+      var vm = e.targetVM;
+      Api.editQA({
+        id:       vm.id,
+        category: vm.category,
+        question: vm.question,
+        answer: vm.answer,
+      });
+    },
+    removeQA: function(e) {
+      Api.removeQA(e.targetVM.id).done(function() {
+        this.QAList.$remove(e.targetVM.$index);
+      }.bind(this));
+    },
   },
 });
 

@@ -21,6 +21,7 @@ module.exports = Vue.extend({
     Api.fetchQAList(this.category).done(function(QAList) {
       this.QAList = QAList.map(function(QA) {
         var data = QA.attributes;
+        data.id = QA.id;
         data.isShow = false;
         return data;
       });
@@ -44,10 +45,28 @@ module.exports = Vue.extend({
         answer: this.answer,
       }).done(function(QA) {
         var data = QA.attributes;
+        data.id = QA.id;
         data.isShow = true;
         this.QAList.unshift(data);
+        this.question = "";
+        this.answer = "";
+        this.isShowForm = false;
       }.bind(this));
-    }
+    },
+    editQA: function(e) {
+      var vm = e.targetVM;
+      Api.editQA({
+        id:       vm.id,
+        category: vm.category,
+        question: vm.question,
+        answer: vm.answer,
+      });
+    },
+    removeQA: function(e) {
+      Api.removeQA(e.targetVM.id).done(function() {
+        this.QAList.$remove(e.targetVM.$index);
+      }.bind(this));
+    },
   },
 });
 

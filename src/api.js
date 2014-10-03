@@ -59,4 +59,19 @@ Api.prototype.addQA = function(data) {
   return qa.save();
 };
 
+Api.prototype.editQA = function(data) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA(data);
+  qa.set("user", user);
+  return qa.save();
+};
+
+Api.prototype.removeQA = function(id) {
+  var user = this.current();
+  var QA = Parse.Object.extend("QA");
+  var qa = new QA({id: id});
+  return qa.destroy();
+};
+
 module.exports = new Api();

@@ -31,7 +31,11 @@
 <div class="list-group qa-list">
   <a class="list-group-item qa-list-item" v-repeat="QAList">
     <span class="qa-list-item-question"  v-on="click: toggleQA">{{question}}</span>
-    <pre class="qa-list-item-answer" v-show="isShow">{{answer}}</pre>
+    <span v-show="isShow">
+      <input type="text" class="qa-list-item-answer" v-model="answer" />
+      <button class="btn btn-primary" v-on="click: editQA">Edit</button>
+      <button class="btn btn-danger" v-on="click: removeQA">Remove</button>
+    </span>
   </a>
 </div>
 
